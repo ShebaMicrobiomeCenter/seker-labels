@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>יצירת מדבקות - Smart Version</title>
+    <style>
+        body { font-family: Segoe UI, Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 20px; color: #333; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h1 { color: #1a73e8; border-bottom: 2px solid #e8eaed; padding-bottom: 10px; }
+        .grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 25px; margin-bottom: 20px; }
+        .card { border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; background: #fafafa; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        input[type="number"], input[type="text"], input[type="range"] { 
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; 
+        }
+        .slider-header { display: flex; justify-content: space-between; align-items: center; }
+        .slider-val { background: #1a73e8; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+        
+        /* Buttons */
+        .button-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        button { border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: 0.2s; }
+        #downloadBtn { background: #28a745; color: white; }
+        #downloadBtn:hover { background: #218838; }
+        #emailBtn { background: #6c757d; color: white; }
+        #emailBtn:hover { background: #5a6268; }
+        
+        .summary { font-size: 1.25rem; font-weight: bold; margin: 25px 0 10px 0; color: #d93025; }
+        .table-container { max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #eee; font-size: 13px; }
+        th { position: sticky; top: 0; background: #f1f3f4; }
+        .memory-hint { font-size: 11px; color: #666; margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>יצירת מדבקות למעבדה</h1>
+
+    <div class="grid">
+        <div class="card">
+            <h3>כמויות מדבקות</h3>
+            <div id="sliders"></div> </div>
+
+        <div class="card">
+            <h3>הגדרות הרצה</h3>
+            <div style="display: flex; gap: 10px;">
+                <div class="input-group" style="flex: 1;">
+                    <label>מאיזה מספר?</label>
+                    <input type="number" id="start_num" value="161">
+                    <div class="memory-hint" id="mem-hint"></div>
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label>עד איזה מספר?</label>
+                    <input type="number" id="end_num" value="170">
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <div class="input-group" style="flex: 1;">
+                    <label>חודש (MM):</label>
+                    <input type="text" id="month" maxlength="2">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label>שנה (YY):</label>
+                    <input type="text" id="year" maxlength="2">
+                </div>
+            </div>
+            
+            <div class="button-stack">
+                <button id="downloadBtn">הורדת טבלה (CSV)</button>
+                <button id="emailBtn">שלח סיכום במייל ✉️</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary" id="summaryText">סך מדבקות: 0</div>
+
+    <div class="table-container">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>PNID</th>
+                    <th>סוג</th>
+                    <th>ברקוד</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const types = [
+        { id: 'Feces', label: 'צואה (Feces)', code: 'F', default: 4 },
+        { id: 'Blood', label: 'דם (Blood)', code: 'B', default: 2 },
+        { id: 'Mouth', label: 'רוק (Mouth)', code: 'M', default: 2 },
+        { id: 'Rectum', label: 'רקטום (Rectum)', code: 'R', default: 0 },
+        { id: 'TI', label: 'TI (Terminal Ileum)', code: 'T', default: 0 }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const sliderContainer = document.getElementById('sliders');
+        const startInput = document.getElementById('start_num');
+        const endInput = document.getElementById('end_num');
+        const memHint = document.getElementById('mem-hint');
+
+        // 1. "Smart" Memory Logic
+        const lastSavedEnd = localStorage.getItem('lab_last_end_num');
+        if (lastSavedEnd) {
+            const nextStart = parseInt(lastSavedEnd) + 1;
+            startInput.value = nextStart;
+            endInput.value = nextStart + 9; // Default range of 10
+            memHint.innerText = `* עודכן אוטומטית (הקודם הסתיים ב-${lastSavedEnd})`;
+        }
+
+        // Generate Sliders
+        types.forEach(t => {
+            sliderContainer.innerHTML += `
+                <div class="input-group">
+                    <div class="slider-header"><label>${t.label}</label><span class="slider-val" id="val-${t.id}">${t.default}</span></div>
+                    <input type="range" class="type-slider" id="${t.id}" min="0" max="10" value="${t.default}">
+                </div>`;
+        });
+
+        // Set Date
+        const now = new Date();
+        document.getElementById('month').value = String(now.getMonth() + 1).padStart(2, '0');
+        document.getElementById('year').value = String(now.getFullYear()).slice(-2);
+
+        function buildData() {
+            const start = parseInt(startInput.value);
+            const end = parseInt(endInput.value);
+            const m = document.getElementById('month').value.padStart(2, '0');
+            const y = document.getElementById('year').value;
+
+            let data = [];
+            if (isNaN(start) || isNaN(end) || start > end) return [];
+
+            for (let i = start; i <= end; i++) {
+                const pnid = `SK${String(i).padStart(4, '0')}`;
+                types.forEach(t => {
+                    const count = parseInt(document.getElementById(t.id).value);
+                    document.getElementById(`val-${t.id}`).innerText = count;
+                    for (let c = 0; c < count; c++) {
+                        data.push({
+                            pnid: pnid,
+                            type: t.code,
+                            month: m,
+                            year: y,
+                            barcode: `${pnid}${t.code}${m}${y}`,
+                            label: t.label
+                        });
+                    }
+                });
+            }
+            return data;
+        }
+
+        function updateUI() {
+            const data = buildData();
+            document.getElementById('summaryText').innerText = `סך מדבקות: ${data.length}`;
+            const tbody = document.querySelector('#dataTable tbody');
+            tbody.innerHTML = '';
+            data.slice(0, 10).forEach(row => {
+                tbody.innerHTML += `<tr><td>${row.pnid}</td><td>${row.label}</td><td><b>${row.barcode}</b></td></tr>`;
+            });
+        }
+
+        // 2. Save memory on Download
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const data = buildData();
+            if (data.length === 0) return alert("נתונים לא תקינים");
+
+            // Save to localStorage
+            localStorage.setItem('lab_last_end_num', endInput.value);
+
+            let csv = "\ufeffpnid,type,month,year,barcode\n";
+            data.forEach(r => csv += `${r.pnid},${r.type},${r.month},${r.year},${r.barcode}\n`);
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `labels_${startInput.value}_to_${endInput.value}.csv`;
+            a.click();
+        });
+
+        // 3. Email Button Logic
+        document.getElementById('emailBtn').addEventListener('click', () => {
+            const data = buildData();
+            const total = data.length;
+            const subject = encodeURIComponent(`דוח מדבקות מעבדה: ${startInput.value}-${endInput.value}`);
+            const body = encodeURIComponent(
+                `שלום,\n\nהופקו ${total} מדבקות עבור טווח הנבדקים ${startInput.value} עד ${endInput.value}.\n` +
+                `חודש: ${document.getElementById('month').value}/${document.getElementById('year').value}\n\n` +
+                `אנא מצא את הקובץ המצורף (יש לצרף את הקובץ שהורדת ידנית).`
+            );
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        });
+
+        document.querySelectorAll('input').forEach(i => i.addEventListener('input', updateUI));
+        updateUI();
+    });
+</script>
+</body>
+</html>
