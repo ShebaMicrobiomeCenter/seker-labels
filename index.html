@@ -2,60 +2,59 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>יצירת מדבקות - Smart Version</title>
+    <title>מערכת מדבקות מעבדה - גרסה מלאה</title>
     <style>
-        body { font-family: Segoe UI, Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 20px; color: #333; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        h1 { color: #1a73e8; border-bottom: 2px solid #e8eaed; padding-bottom: 10px; }
-        .grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 25px; margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
+        .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 25px; }
         .card { border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; background: #fafafa; }
+        h3 { margin-top: 0; color: #1a73e8; border-bottom: 2px solid #ddd; padding-bottom: 8px; }
         .input-group { margin-bottom: 15px; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
-        input[type="number"], input[type="text"], input[type="range"] { 
+        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 14px; }
+        input[type="number"], input[type="text"], input[type="range"], input[type="email"] { 
             width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; 
         }
         .slider-header { display: flex; justify-content: space-between; align-items: center; }
-        .slider-val { background: #1a73e8; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
-        
-        /* Buttons */
-        .button-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
-        button { border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: 0.2s; }
-        #downloadBtn { background: #28a745; color: white; }
-        #downloadBtn:hover { background: #218838; }
-        #emailBtn { background: #6c757d; color: white; }
-        #emailBtn:hover { background: #5a6268; }
-        
-        .summary { font-size: 1.25rem; font-weight: bold; margin: 25px 0 10px 0; color: #d93025; }
-        .table-container { max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #eee; font-size: 13px; }
-        th { position: sticky; top: 0; background: #f1f3f4; }
-        .memory-hint { font-size: 11px; color: #666; margin-top: 4px; }
+        .slider-val { background: #1a73e8; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+        .btn-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        button { padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .btn-download { background: #28a745; color: white; }
+        .btn-email { background: #007bff; color: white; }
+        button:hover { opacity: 0.9; }
+        .summary { font-size: 1.2rem; font-weight: bold; margin-top: 25px; text-align: center; color: #d93025; background: #fff1f0; padding: 10px; border-radius: 6px; }
+        .memory-hint { font-size: 12px; color: #28a745; margin-top: 5px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>יצירת מדבקות למעבדה</h1>
+    <h1>🧬 מחולל מדבקות חכם</h1>
 
     <div class="grid">
         <div class="card">
             <h3>כמויות מדבקות</h3>
-            <div id="sliders"></div> </div>
+            <div id="slider-list"></div>
+        </div>
 
         <div class="card">
-            <h3>הגדרות הרצה</h3>
+            <h3>הגדרות הרצה ומשלוח</h3>
+            <div class="input-group">
+                <label>אימייל נמען:</label>
+                <input type="email" id="email_to" value="lab@example.com">
+            </div>
+            
             <div style="display: flex; gap: 10px;">
                 <div class="input-group" style="flex: 1;">
                     <label>מאיזה מספר?</label>
-                    <input type="number" id="start_num" value="161">
-                    <div class="memory-hint" id="mem-hint"></div>
+                    <input type="number" id="start_num">
+                    <div id="mem-note" class="memory-hint"></div>
                 </div>
                 <div class="input-group" style="flex: 1;">
                     <label>עד איזה מספר?</label>
-                    <input type="number" id="end_num" value="170">
+                    <input type="number" id="end_num">
                 </div>
             </div>
+
             <div style="display: flex; gap: 10px;">
                 <div class="input-group" style="flex: 1;">
                     <label>חודש (MM):</label>
@@ -66,141 +65,126 @@
                     <input type="text" id="year" maxlength="2">
                 </div>
             </div>
-            
-            <div class="button-stack">
-                <button id="downloadBtn">הורדת טבלה (CSV)</button>
-                <button id="emailBtn">שלח סיכום במייל ✉️</button>
+
+            <div class="btn-stack">
+                <button class="btn-download" id="btnDownload">1. הורד קובץ CSV 💾</button>
+                <button class="btn-email" id="btnEmail">2. שלח מייל עם קישור להגדרות ✉️</button>
             </div>
         </div>
     </div>
 
     <div class="summary" id="summaryText">סך מדבקות: 0</div>
-
-    <div class="table-container">
-        <table id="dataTable">
-            <thead>
-                <tr>
-                    <th>PNID</th>
-                    <th>סוג</th>
-                    <th>ברקוד</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
 </div>
 
 <script>
+    // Configuration for all types
     const types = [
-        { id: 'Feces', label: 'צואה (Feces)', code: 'F', default: 4 },
-        { id: 'Blood', label: 'דם (Blood)', code: 'B', default: 2 },
-        { id: 'Mouth', label: 'רוק (Mouth)', code: 'M', default: 2 },
-        { id: 'Rectum', label: 'רקטום (Rectum)', code: 'R', default: 0 },
-        { id: 'TI', label: 'TI (Terminal Ileum)', code: 'T', default: 0 }
+        { id: 'Feces', label: 'צואה (Feces)', code: 'F', def: 4 },
+        { id: 'Blood', label: 'דם (Blood)', code: 'B', def: 2 },
+        { id: 'Mouth', label: 'רוק (Mouth)', code: 'M', def: 2 },
+        { id: 'Rectum', label: 'רקטום (Rectum)', code: 'R', def: 0 },
+        { id: 'TI', label: 'TI (Terminal Ileum)', code: 'T', def: 0 }
     ];
 
     document.addEventListener('DOMContentLoaded', () => {
-        const sliderContainer = document.getElementById('sliders');
+        const sliderList = document.getElementById('slider-list');
         const startInput = document.getElementById('start_num');
         const endInput = document.getElementById('end_num');
-        const memHint = document.getElementById('mem-hint');
+        const memNote = document.getElementById('mem-note');
+        
+        // 1. Parse URL Parameters
+        const urlParams = new URLSearchParams(window.location.search);
 
-        // 1. "Smart" Memory Logic
-        const lastSavedEnd = localStorage.getItem('lab_last_end_num');
-        if (lastSavedEnd) {
-            const nextStart = parseInt(lastSavedEnd) + 1;
-            startInput.value = nextStart;
-            endInput.value = nextStart + 9; // Default range of 10
-            memHint.innerText = `* עודכן אוטומטית (הקודם הסתיים ב-${lastSavedEnd})`;
-        }
-
-        // Generate Sliders
+        // 2. Setup Sliders with URL or Defaults
         types.forEach(t => {
-            sliderContainer.innerHTML += `
+            const val = urlParams.get(t.id) || t.def;
+            sliderList.innerHTML += `
                 <div class="input-group">
-                    <div class="slider-header"><label>${t.label}</label><span class="slider-val" id="val-${t.id}">${t.default}</span></div>
-                    <input type="range" class="type-slider" id="${t.id}" min="0" max="10" value="${t.default}">
+                    <div class="slider-header"><label>${t.label}</label><span class="slider-val" id="val-${t.id}">${val}</span></div>
+                    <input type="range" class="type-slider" id="${t.id}" min="0" max="10" value="${val}" 
+                           oninput="document.getElementById('val-${t.id}').innerText=this.value; update();">
                 </div>`;
         });
 
-        // Set Date
+        // 3. Smart Memory & Date Defaults
+        const lastSaved = localStorage.getItem('lab_last_end_num');
+        startInput.value = urlParams.get('start') || (lastSaved ? parseInt(lastSaved) + 1 : 161);
+        endInput.value = urlParams.get('end') || (parseInt(startInput.value) + 9);
+        
+        if (!urlParams.has('start') && lastSaved) {
+            memNote.innerText = `* ממשיך מ-${lastSaved}`;
+        }
+
         const now = new Date();
         document.getElementById('month').value = String(now.getMonth() + 1).padStart(2, '0');
         document.getElementById('year').value = String(now.getFullYear()).slice(-2);
 
-        function buildData() {
+        // 4. Update Logic
+        window.update = () => {
+            const start = parseInt(startInput.value);
+            const end = parseInt(endInput.value);
+            const range = (end - start + 1);
+            let totalPerPerson = 0;
+            types.forEach(t => totalPerPerson += parseInt(document.getElementById(t.id).value));
+            
+            const total = isNaN(range) || range < 0 ? 0 : range * totalPerPerson;
+            document.getElementById('summaryText').innerText = `סך מדבקות לייצור: ${total}`;
+        };
+
+        // 5. Generate Shareable Link
+        function getShareLink() {
+            const baseUrl = window.location.href.split('?')[0];
+            const p = new URLSearchParams();
+            p.set('start', startInput.value);
+            p.set('end', endInput.value);
+            types.forEach(t => p.set(t.id, document.getElementById(t.id).value));
+            return `${baseUrl}?${p.toString()}`;
+        }
+
+        // 6. Event Listeners
+        document.getElementById('btnDownload').addEventListener('click', () => {
             const start = parseInt(startInput.value);
             const end = parseInt(endInput.value);
             const m = document.getElementById('month').value.padStart(2, '0');
             const y = document.getElementById('year').value;
 
-            let data = [];
-            if (isNaN(start) || isNaN(end) || start > end) return [];
+            if (isNaN(start) || isNaN(end) || start > end) return alert("טווח לא תקין");
 
+            let csv = "\ufeffpnid,long_type,type,barcode\n";
             for (let i = start; i <= end; i++) {
                 const pnid = `SK${String(i).padStart(4, '0')}`;
                 types.forEach(t => {
-                    const count = parseInt(document.getElementById(t.id).value);
-                    document.getElementById(`val-${t.id}`).innerText = count;
+                    const count = document.getElementById(t.id).value;
                     for (let c = 0; c < count; c++) {
-                        data.push({
-                            pnid: pnid,
-                            type: t.code,
-                            month: m,
-                            year: y,
-                            barcode: `${pnid}${t.code}${m}${y}`,
-                            label: t.label
-                        });
+                        csv += `${pnid},${t.label},${t.code},${pnid}${t.code}${m}${y}\n`;
                     }
                 });
             }
-            return data;
-        }
 
-        function updateUI() {
-            const data = buildData();
-            document.getElementById('summaryText').innerText = `סך מדבקות: ${data.length}`;
-            const tbody = document.querySelector('#dataTable tbody');
-            tbody.innerHTML = '';
-            data.slice(0, 10).forEach(row => {
-                tbody.innerHTML += `<tr><td>${row.pnid}</td><td>${row.label}</td><td><b>${row.barcode}</b></td></tr>`;
-            });
-        }
-
-        // 2. Save memory on Download
-        document.getElementById('downloadBtn').addEventListener('click', () => {
-            const data = buildData();
-            if (data.length === 0) return alert("נתונים לא תקינים");
-
-            // Save to localStorage
-            localStorage.setItem('lab_last_end_num', endInput.value);
-
-            let csv = "\ufeffpnid,type,month,year,barcode\n";
-            data.forEach(r => csv += `${r.pnid},${r.type},${r.month},${r.year},${r.barcode}\n`);
-            
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `labels_${startInput.value}_to_${endInput.value}.csv`;
-            a.click();
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Labels_${start}_to_${end}.csv`;
+            link.click();
+
+            // Save Memory
+            localStorage.setItem('lab_last_end_num', end);
         });
 
-        // 3. Email Button Logic
-        document.getElementById('emailBtn').addEventListener('click', () => {
-            const data = buildData();
-            const total = data.length;
-            const subject = encodeURIComponent(`דוח מדבקות מעבדה: ${startInput.value}-${endInput.value}`);
+        document.getElementById('btnEmail').addEventListener('click', () => {
+            const link = getShareLink();
+            const to = document.getElementById('email_to').value;
+            const subject = encodeURIComponent(`הגדרות מדבקות: ${startInput.value}-${endInput.value}`);
             const body = encodeURIComponent(
-                `שלום,\n\nהופקו ${total} מדבקות עבור טווח הנבדקים ${startInput.value} עד ${endInput.value}.\n` +
-                `חודש: ${document.getElementById('month').value}/${document.getElementById('year').value}\n\n` +
-                `אנא מצא את הקובץ המצורף (יש לצרף את הקובץ שהורדת ידנית).`
+                `שלום,\n\nמצורף קישור להגדרות המדבקות עבור טווח המספרים ${startInput.value} עד ${endInput.value}.\n\n` +
+                `לחץ כאן כדי לטעון את ההגדרות ולהפיק את הקובץ:\n${link}\n\n` +
+                `נא לצרף את קובץ ה-CSV להודעה זו לאחר ההורדה.`
             );
-            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+            window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
         });
 
-        document.querySelectorAll('input').forEach(i => i.addEventListener('input', updateUI));
-        updateUI();
+        [startInput, endInput].forEach(el => el.addEventListener('input', update));
+        update();
     });
 </script>
 </body>
