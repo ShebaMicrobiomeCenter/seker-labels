@@ -77,7 +77,6 @@
 </div>
 
 <script>
-    // Configuration for all types
     const types = [
         { id: 'Feces', label: 'צואה (Feces)', code: 'F', def: 4 },
         { id: 'Blood', label: 'דם (Blood)', code: 'B', def: 2 },
@@ -92,10 +91,8 @@
         const endInput = document.getElementById('end_num');
         const memNote = document.getElementById('mem-note');
         
-        // 1. Parse URL Parameters
         const urlParams = new URLSearchParams(window.location.search);
 
-        // 2. Setup Sliders with URL or Defaults
         types.forEach(t => {
             const val = urlParams.get(t.id) || t.def;
             sliderList.innerHTML += `
@@ -106,7 +103,6 @@
                 </div>`;
         });
 
-        // 3. Smart Memory & Date Defaults
         const lastSaved = localStorage.getItem('lab_last_end_num');
         startInput.value = urlParams.get('start') || (lastSaved ? parseInt(lastSaved) + 1 : 161);
         endInput.value = urlParams.get('end') || (parseInt(startInput.value) + 9);
@@ -119,7 +115,6 @@
         document.getElementById('month').value = String(now.getMonth() + 1).padStart(2, '0');
         document.getElementById('year').value = String(now.getFullYear()).slice(-2);
 
-        // 4. Update Logic
         window.update = () => {
             const start = parseInt(startInput.value);
             const end = parseInt(endInput.value);
@@ -131,7 +126,6 @@
             document.getElementById('summaryText').innerText = `סך מדבקות לייצור: ${total}`;
         };
 
-        // 5. Generate Shareable Link
         function getShareLink() {
             const baseUrl = window.location.href.split('?')[0];
             const p = new URLSearchParams();
@@ -141,22 +135,26 @@
             return `${baseUrl}?${p.toString()}`;
         }
 
-        // 6. Event Listeners
         document.getElementById('btnDownload').addEventListener('click', () => {
             const start = parseInt(startInput.value);
             const end = parseInt(endInput.value);
             const m = document.getElementById('month').value.padStart(2, '0');
-            const y = document.getElementById('year').value;
+            const yShort = document.getElementById('year').value;
+            // Logical check: if year is "25" it becomes "2025"
+            const yLong = yShort.length === 2 ? `20${yShort}` : yShort; 
 
             if (isNaN(start) || isNaN(end) || start > end) return alert("טווח לא תקין");
 
-            let csv = "\ufeffpnid,long_type,type,barcode\n";
+            // Added the new columns to the header
+            let csv = "\ufeffpnid,long_type,type,barcode,short_number,month,long_year\n";
+            
             for (let i = start; i <= end; i++) {
                 const pnid = `SK${String(i).padStart(4, '0')}`;
                 types.forEach(t => {
                     const count = document.getElementById(t.id).value;
                     for (let c = 0; c < count; c++) {
-                        csv += `${pnid},${t.label},${t.code},${pnid}${t.code}${m}${y}\n`;
+                        // Added i (short_number), m (month), and yLong (long_year) to each row
+                        csv += `${pnid},${t.label},${t.code},${pnid}${t.code}${m}${yShort},${i},${m},${yLong}\n`;
                     }
                 });
             }
@@ -167,7 +165,6 @@
             link.download = `Labels_${start}_to_${end}.csv`;
             link.click();
 
-            // Save Memory
             localStorage.setItem('lab_last_end_num', end);
         });
 
