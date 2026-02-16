@@ -40,7 +40,7 @@
             <h3>הגדרות הרצה ומשלוח</h3>
             <div class="input-group">
                 <label>אימייל נמען:</label>
-                <input type="email" id="email_to" value="lab@example.com">
+                <input type="email" id="email_to" placeholder="lab@example.com">
             </div>
             
             <div style="display: flex; gap: 10px;">
@@ -89,10 +89,12 @@
         const sliderList = document.getElementById('slider-list');
         const startInput = document.getElementById('start_num');
         const endInput = document.getElementById('end_num');
+        const emailInput = document.getElementById('email_to');
         const memNote = document.getElementById('mem-note');
         
         const urlParams = new URLSearchParams(window.location.search);
 
+        // Load Sliders
         types.forEach(t => {
             const val = urlParams.get(t.id) || t.def;
             sliderList.innerHTML += `
@@ -103,14 +105,22 @@
                 </div>`;
         });
 
-        const lastSaved = localStorage.getItem('lab_last_end_num');
-        startInput.value = urlParams.get('start') || (lastSaved ? parseInt(lastSaved) + 1 : 161);
+        // Memory Logic for Numbers
+        const lastSavedNum = localStorage.getItem('lab_last_end_num');
+        startInput.value = urlParams.get('start') || (lastSavedNum ? parseInt(lastSavedNum) + 1 : 161);
         endInput.value = urlParams.get('end') || (parseInt(startInput.value) + 9);
         
-        if (!urlParams.has('start') && lastSaved) {
-            memNote.innerText = `* ממשיך מ-${lastSaved}`;
+        if (!urlParams.has('start') && lastSavedNum) {
+            memNote.innerText = `* ממשיך מ-${lastSavedNum}`;
         }
 
+        // Memory Logic for Email
+        const savedEmail = localStorage.getItem('lab_last_email');
+        if (savedEmail) {
+            emailInput.value = savedEmail;
+        }
+
+        // Set Date
         const now = new Date();
         document.getElementById('month').value = String(now.getMonth() + 1).padStart(2, '0');
         document.getElementById('year').value = String(now.getFullYear()).slice(-2);
@@ -140,12 +150,10 @@
             const end = parseInt(endInput.value);
             const m = document.getElementById('month').value.padStart(2, '0');
             const yShort = document.getElementById('year').value;
-            // Logical check: if year is "25" it becomes "2025"
             const yLong = yShort.length === 2 ? `20${yShort}` : yShort; 
 
             if (isNaN(start) || isNaN(end) || start > end) return alert("טווח לא תקין");
 
-            // Added the new columns to the header
             let csv = "\ufeffpnid,long_type,type,barcode,short_number,month,long_year\n";
             
             for (let i = start; i <= end; i++) {
@@ -153,7 +161,6 @@
                 types.forEach(t => {
                     const count = document.getElementById(t.id).value;
                     for (let c = 0; c < count; c++) {
-                        // Added i (short_number), m (month), and yLong (long_year) to each row
                         csv += `${pnid},${t.label},${t.code},${pnid}${t.code}${m}${yShort},${i},${m},${yLong}\n`;
                     }
                 });
@@ -169,14 +176,23 @@
         });
 
         document.getElementById('btnEmail').addEventListener('click', () => {
+            const to = emailInput.value;
+            if (!to) return alert("נא להזין כתובת אימייל");
+
+            // Save email to local storage for next time
+            localStorage.setItem('lab_last_email', to);
+
+            const start = startInput.value;
+            const end = endInput.value;
             const link = getShareLink();
-            const to = document.getElementById('email_to').value;
-            const subject = encodeURIComponent(`הגדרות מדבקות: ${startInput.value}-${endInput.value}`);
+            
+            const subject = encodeURIComponent(`הגדרות מדבקות: ${start}-${end}`);
             const body = encodeURIComponent(
-                `שלום,\n\nמצורף קישור להגדרות המדבקות עבור טווח המספרים ${startInput.value} עד ${endInput.value}.\n\n` +
+                `שלום,\n\nמצורף קישור להגדרות המדבקות עבור טווח המספרים ${start} עד ${end}.\n\n` +
                 `לחץ כאן כדי לטעון את ההגדרות ולהפיק את הקובץ:\n${link}\n\n` +
                 `נא לצרף את קובץ ה-CSV להודעה זו לאחר ההורדה.`
             );
+            
             window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
         });
 
