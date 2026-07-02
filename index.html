@@ -20,9 +20,19 @@
         button { padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
         .btn-download { background: #28a745; color: white; }
         .btn-email { background: #007bff; color: white; }
+        .btn-help { background: #ff9800; color: white; margin-top: 5px; }
         button:hover { opacity: 0.9; }
         .summary { font-size: 1.2rem; font-weight: bold; margin-top: 25px; text-align: center; color: #d93025; background: #fff1f0; padding: 10px; border-radius: 6px; }
         .memory-hint { font-size: 12px; color: #28a745; margin-top: 5px; font-weight: bold; }
+        
+        /* סגנון לחלון המדריך החדש */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: white; margin: 5% auto; padding: 25px; border-radius: 12px; max-width: 650px; direction: rtl; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border-top: 8px solid #ff9800; }
+        .close-btn { float: left; font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa; line-height: 20px; }
+        .close-btn:hover { color: black; }
+        .step-list { padding-right: 20px; }
+        .step-list li { margin-bottom: 12px; line-height: 1.5; }
+        .highlight-alert { color: #d93025; font-weight: bold; background: #fff1f0; padding: 2px 6px; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -69,11 +79,34 @@
             <div class="btn-stack">
                 <button class="btn-download" id="btnDownload">1. הורד קובץ CSV 💾</button>
                 <button class="btn-email" id="btnEmail">2. שלח מייל עם קישור להגדרות ✉️</button>
+                <button class="btn-help" id="btnHelp" type="button">💡 מדריך והנחיות להדפסת המדבקות</button>
             </div>
         </div>
     </div>
 
     <div class="summary" id="summaryText">סך מדבקות: 0</div>
+</div>
+
+<div id="helpModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="closeModal">&times;</span>
+        <h2>📋 מדריך להדפסת המדבקות (מחשב רותם)</h2>
+        <p>כדי שהמדבקות והברקודים יודפסו בצורה מדויקת ובאיכות גבוהה, עקבו אחר השלבים הבאים במדויק:</p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+        <ol class="step-list">
+            <li><strong>אתחול למערכת מתאימה:</strong> יש לבצע הפעלה מחדש (Restart) למחשב של רותם. מיד בהדלקה יופיע בורר מערכות הפעלה - יש לבחור ב-<strong>ZORIN</strong> ולא בווינדווס.</li>
+            <li><strong>התחברות:</strong> במסך הכניסה יש לבחור ביוזר אורח (<strong>Guest</strong>) - אין צורך בסיסמה.</li>
+            <li><strong>טעינת התבנית:</strong> פתחו את תוכנת <strong>gLabels</strong>, ופתחו בה את קובץ התבנית הקבוע של המדבקות.</li>
+            <li><strong>מיזוג נתונים:</strong> בצעו פעולת <strong>Merge</strong> (מיזוג) בתוכנה והטעינו את קובץ ה-CSV שהורדתם מהאתר הזה.</li>
+            <li><strong><span class="highlight-alert">הגדרות הדפסה קריטיות:</span></strong> כאשר שולחים להדפסה, היכנסו להגדרות המתקדמות של המדפסת וודאו:
+                <ul>
+                    <li>שאיכות ההדפסה מוגדרת על איכות גבוהה של <strong>300x600 DPI</strong> (ולא ברירת המחדל).</li>
+                    <li>שההדפסה מוגדרת על <strong>מצב תמונות (Images)</strong> ולא רק טקסט.</li>
+                </ul>
+            </li>
+            <li><strong>סיום:</strong> שלחו להדפסה ובדקו שהתוצאה יצאה קריאה ונקייה.</li>
+        </ol>
+    </div>
 </div>
 
 <script>
@@ -179,7 +212,6 @@
             const to = emailInput.value;
             if (!to) return alert("נא להזין כתובת אימייל");
 
-            // Save email to local storage for next time
             localStorage.setItem('lab_last_email', to);
 
             const start = startInput.value;
@@ -195,6 +227,12 @@
             
             window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
         });
+
+        // לוגיקה לפתיחה וסגירה של חלון ההדרכה
+        const modal = document.getElementById('helpModal');
+        document.getElementById('btnHelp').addEventListener('click', () => modal.style.display = 'block');
+        document.getElementById('closeModal').addEventListener('click', () => modal.style.display = 'none');
+        window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
 
         [startInput, endInput].forEach(el => el.addEventListener('input', update));
         update();
