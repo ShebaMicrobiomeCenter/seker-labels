@@ -27,7 +27,7 @@
         
         /* סגנון לחלון המדריך החדש */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-        .modal-content { background-color: white; margin: 5% auto; padding: 25px; border-radius: 12px; max-width: 650px; direction: rtl; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border-top: 8px solid #ff9800; }
+        .modal-content { background-color: white; margin: 2% auto; padding: 25px; border-radius: 12px; max-width: 750px; direction: rtl; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border-top: 8px solid #ff9800; overflow-y: auto; max-height: 90vh; }
         .close-btn { float: left; font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa; line-height: 20px; }
         .close-btn:hover { color: black; }
         .step-list { padding-right: 20px; }
@@ -94,17 +94,24 @@
         <p>כדי שהמדבקות והברקודים יודפסו בצורה מדויקת ובאיכות גבוהה, עקבו אחר השלבים הבאים במדויק:</p>
         <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
         <ol class="step-list">
-            <li><strong>אתחול למערכת מתאימה:</strong> יש לבצע הפעלה מחדש (Restart) למחשב של רותם. מיד בהדלקה יופיע בורר מערכות הפעלה - יש לבחור ב-<strong>ZORIN</strong> ולא בווינדווס.</li>
-            <li><strong>התחברות:</strong> במסך הכניסה יש לבחור ביוזר אורח (<strong>Guest</strong>) - אין צורך בסיסמה.</li>
-            <li><strong>טעינת התבנית:</strong> פתחו את תוכנת <strong>gLabels</strong>, ופתחו בה את קובץ התבנית הקבוע של המדבקות.</li>
-            <li><strong>מיזוג נתונים:</strong> בצעו פעולת <strong>Merge</strong> (מיזוג) בתוכנה והטעינו את קובץ ה-CSV שהורדתם מהאתר הזה.</li>
-            <li><strong><span class="highlight-alert">הגדרות הדפסה קריטיות:</span></strong> כאשר שולחים להדפסה, היכנסו להגדרות המתקדמות של המדפסת וודאו:
+            <li><strong>אתחול למערכת מתאימה:</strong> יש לבצע הפעלה מחדש (Restart) למחשב של רותם. מיד בהדלקה יופיע בורר מערכות הפעלה - יש לבחור ב-<strong>ZORIN</strong> (סמל כחול) ולא בווינדווס.</li>
+            <li><strong>התחברות:</strong> במסך הכניסה יש לבחור ביוזר אורח (<strong>Guest</strong>). במידה ונדרשת סיסמה, הרמז הוא: <strong>מספר החדר</strong>.</li>
+            <li><strong>טעינת התבנית:</strong> פתחו את תוכנת <strong>gLabels</strong>, ופתחו בה את קובץ התבנית הקבוע של המדבקות (seker_labels.glabels).
+                <br>
+                <a href="seker_labels.glabels" download style="color: #1a73e8; text-decoration: underline; font-size: 0.9em;">לחצו כאן להורדת קובץ התבנית במידה וחסר</a>
+            </li>
+            <li><strong>מיזוג נתונים:</strong> בצעו פעולת <strong>Merge</strong> (מיזוג) בתוכנה והטעינו את קובץ ה-CSV שהורדתם מהאתר הזה (כפתור 1).</li>
+            <li><strong><span class="highlight-alert">הגדרות הדפסה קריטיות:</span></strong> לאחר הלחיצה על Print, היכנסו להגדרות המתקדמות (Properties/Settings) וודאו את שני הסעיפים הבאים:
                 <ul>
-                    <li>שאיכות ההדפסה מוגדרת על איכות גבוהה של <strong>300x600 DPI</strong> (ולא ברירת המחדל).</li>
-                    <li>שההדפסה מוגדרת על <strong>מצב תמונות (Images)</strong> ולא רק טקסט.</li>
+                    <li>בלשונית <strong>Image Quality</strong>, וודאו שהרזולוציה היא <strong>300x600 DPI</strong>:
+                        <br><img src="image_quality.png" alt="הגדרת איכות תמונה" style="max-width: 100%; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    </li>
+                    <li>בלשונית <strong>Advanced</strong>, וודאו ש-Print Quality מוגדר כ-<strong>Barcodes and Graphics</strong>:
+                        <br><img src="advanced.png" alt="הגדרות מתקדמות" style="max-width: 100%; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    </li>
                 </ul>
             </li>
-            <li><strong>סיום:</strong> שלחו להדפסה ובדקו שהתוצאה יצאה קריאה ונקייה.</li>
+            <li><strong>סיום:</strong> שלחו להדפסה ובדקו שהברקודים יצאו חדים וקריאים לסורק.</li>
         </ol>
     </div>
 </div>
